@@ -27,3 +27,9 @@ module "my_subnet" {
   az_public          = var.az_public
   az_private         = var.az_private
 }
+module "ec2_instance"{
+  source ="./modules//instance/"
+  my_vpc_id = aws_vpc.my_vpc.id
+  instance_type=var.instance_type
+  public_subnet=module.my_subnet.public_subnet
+}
