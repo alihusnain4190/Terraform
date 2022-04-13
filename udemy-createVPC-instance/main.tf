@@ -27,9 +27,14 @@ module "my_subnet" {
   az_public          = var.az_public
   az_private         = var.az_private
 }
-module "ec2_instance"{
-  source ="./modules//instance/"
-  my_vpc_id = aws_vpc.my_vpc.id
-  instance_type=var.instance_type
-  public_subnet=module.my_subnet.public_subnet
+module "ec2_instance" {
+  source         = "./modules//instance/"
+  my_vpc_id      = aws_vpc.my_vpc.id
+  instance_type  = var.instance_type
+  public_subnet  = module.my_subnet.public_subnet
+  private_subnet = module.my_subnet.private_subnet
+  my_private_security_group_id=module.ec2_instance.my_security_group.id
+}
+output "my_public_security_group_name"{
+  value=module.ec2_instance.my_security_group.id
 }

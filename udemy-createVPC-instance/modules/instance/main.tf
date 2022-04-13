@@ -19,12 +19,37 @@ resource "aws_security_group" "my_security_group" {
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
-
   tags = {
     "Name" = "g_name"
   }
 }
 
+
+resource "aws_security_group" "my_private_security_group" {
+  name        = "my_private_security_group"
+  description = "allow 22 port"
+  vpc_id      = var.my_vpc_id
+
+  ingress {
+    description      = "TLS from VPC"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    security_groups  = [var.my_private_security_group_id]
+    ipv6_cidr_blocks = []
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    "Name" = "sg_private"
+  }
+}
 data "aws_ami" "amazon-linux-2" {
   most_recent = true
   owners      = ["amazon"]
@@ -50,3 +75,16 @@ resource "aws_instance" "my_public_instance" {
 
   }
 }
+resource "aws_instance" "my_private_instance" {
+  ami                    = data.aws_ami.amazon-linux-2.id
+  instance_type          = var.instance_type
+  subnet_id              = var.private_subnet.id
+  vpc_security_group_ids = [aws_security_group.my_private_security_group.id]
+  key_name               = "k8-key"
+
+  tags = {
+    "Name" = "my_private_instance"
+
+  }
+}
+
